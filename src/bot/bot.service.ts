@@ -271,6 +271,9 @@ await ctx.editMessageText("Xabar muvaffaqiyatli yangilandi!");
     }else{
       if(findUser.role!="patient"){
         await ctx.reply(registeredAsGenerous[language]);
+        await ctx.reply(mainMessage[language], {
+          reply_markup: generousMenuKeys[language],
+        })
         return
       }
 
@@ -343,6 +346,9 @@ await ctx.editMessageText("Xabar muvaffaqiyatli yangilandi!");
     }else{
       if(findUser.role!="generous"){
         await ctx.reply(registeredAsPatient[language]);
+        await ctx.reply(mainMessage[language], {
+          reply_markup: generousMenuKeys[language],
+        })
         return
       }
 
@@ -612,16 +618,21 @@ await ctx.editMessageText("Xabar muvaffaqiyatli yangilandi!");
               }
             );
             
-    switch (user.role) {
+    switch (user.role ) {
       case 'generous':
-        await ctx.reply(mainMessage[language], {
-          reply_markup: generousMenuKeys[language],
-        });
+        if(user.last_state == "finish"){
+          await ctx.reply(mainMessage[language], {
+            reply_markup: generousMenuKeys[language],
+          });
+        }
         break;
       case 'patient':
-        await ctx.reply(mainMessage[language], {
-          reply_markup: patientMenuKeys[language],
-        });
+        if(user.last_state == "finish"){
+
+          await ctx.reply(mainMessage[language], {
+            reply_markup: patientMenuKeys[language],
+          });
+        }
         break;
       default:
         break;
@@ -640,7 +651,7 @@ await ctx.editMessageText("Xabar muvaffaqiyatli yangilandi!");
         );
         findAdmin.setDataValue('last_state', 'finish'); 
         await findAdmin.save();
-        await ctx.reply("Javob muvaffaqiyatli yuborildi ✅");
+        await ctx.reply("Habaringiz muvaffaqiyatli yuborildi ✅");
       }
       if(findAdmin.dataValues.last_state?.startsWith("editReq_")){
         const applicationId= findAdmin.dataValues.last_state.split("_")[1]

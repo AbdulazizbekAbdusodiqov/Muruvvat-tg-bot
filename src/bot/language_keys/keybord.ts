@@ -22,7 +22,7 @@ export const registerMenuKeys: Record<string, InlineKeyboardMarkup>  = {
     inline_keyboard: [
       [
         Markup.button.callback('👨 Щедрый', 'generous'),
-        Markup.button.callback('👨 Пациент', 'patient'),
+        Markup.button.callback('👨 Терпеливый', 'patient'),
       ],
     ],
   },

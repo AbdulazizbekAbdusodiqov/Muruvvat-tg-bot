@@ -87,20 +87,46 @@ export class BotUpdate {
         return;
       }
   
-      switch (findUser.role) {
-        case 'generous':
-          await ctx.reply(mainMessage[findUser.lang], {
-            reply_markup: generousMenuKeys[findUser.lang],
-          });
-          break;
-        case 'patient':
-          await ctx.reply(mainMessage[findUser.lang], {
-            reply_markup: patientMenuKeys[findUser.lang],
-          });
-          break;
-        default:
-          break;
-      }
+      if(findUser.last_state == "finish"){
+
+        switch (findUser.role) {
+          case 'generous':
+            let removeKeyboard = await ctx.reply("...",{
+                  reply_markup: { remove_keyboard: true }
+              });
+            
+              setTimeout(() => {
+                  ctx.deleteMessage(removeKeyboard.message_id);
+              }, 500);
+
+            await ctx.reply(mainMessage[findUser.lang], {
+              reply_markup: generousMenuKeys[findUser.lang],
+            });
+            break;
+          case 'patient':
+            await ctx.reply(mainMessage[findUser.lang], {
+              reply_markup: patientMenuKeys[findUser.lang],
+            });
+            break;
+          default:
+            break;
+        }
+    }else if(findUser.last_state == "name"){
+      ctx.reply("Ismingizni kiriting:", Markup.removeKeyboard())
+    }else if(findUser.last_state == "contact"){
+      await ctx.reply(
+        `Iltimos, <b>📞 Telefon raqamini yuborish</b> tugmasini bosing`,
+        {
+          parse_mode: "HTML",
+          ...Markup.keyboard([
+            [Markup.button.contactRequest("📞 Telefon raqamini yuborish")],
+          ])
+            .resize()
+            .oneTime(),
+        }
+      );
+    }
+    
 
 
     }
@@ -336,11 +362,12 @@ async onBackMain(@Ctx() ctx: Context) {
         }
       } catch (error) {
         const language = findUser!.lang === 'uz' ? 'uz' : 'ru';
-        await ctx.reply(mainMessage[language], {
+        const removedMessage =  await ctx.reply(mainMessage[language], {
           reply_markup: {
             remove_keyboard: true 
           }
         });
+        await ctx.deleteMessage(removedMessage.message_id);
         switch (findUser.role) {
           case 'generous':
             await ctx.reply(mainMessage[language], {
@@ -473,7 +500,7 @@ async onBackMain(@Ctx() ctx: Context) {
           inline_keyboard: [
             [
               Markup.button.callback('✅', 'accept'),
-              Markup.button.callback('❌', 'reject'),
+              Markup.button.callback('❌', `reject`),
             ],
           ],
         },
@@ -532,14 +559,29 @@ async onBackMain(@Ctx() ctx: Context) {
 
   @Action(/reject/)
   async reject(@Ctx() ctx: Context) {
-    const [, id] = (ctx.update as any).callback_query.data.split('=');
+    // const [, id] = (ctx.update as any).callback_query.data.split('=');
     const user_id = ctx.from?.id;
     const findUser = await this.botModel.findByPk(user_id);
     const language = findUser!.lang === 'uz' ? 'uz' : 'ru';
-    await this.donationModel.destroy({ where:{id} });
-    await ctx.editMessageText(mainMessage[language], {
-      reply_markup: generousMenuKeys[language],
-    });
+    await this.donationModel.destroy({ where:{id:user_id} });
+    if (findUser) {
+      findUser.last_state = "region";
+    }
+    await findUser?.save()
+      const buttons = this.buttonService.generateRegionButtons(
+        0,
+        language,
+        'region',
+      );
+      if (ctx.callbackQuery && 'message' in ctx.callbackQuery) {
+        await ctx.deleteMessage(ctx.callbackQuery.message!.message_id);
+        await ctx.reply(askRegionMessage[language], {
+          reply_markup: buttons,
+        });
+      }
+    // await ctx.editMessageText(mainMessage[language], {
+    //   reply_markup: generousMenuKeys[language],
+    // });
 
   }
 
