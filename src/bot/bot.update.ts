@@ -42,9 +42,9 @@ export class BotUpdate {
   async onStart(@Ctx() ctx: Context) {
     const guest_id = ctx.from?.id;
     const findUser = await this.botModel.findByPk(guest_id);
-    const text = ctx.text;
-    const payload = text?.split(' ')[1]; 
-    const donationId = payload?.split('_')[1];
+    const text = ctx.text || '';
+    const payload = text.split(' ')[1] || '';
+    const donationId = payload.split('_')[1] || '';
     console.log(payload);
     console.log("test");
     console.log(ctx);
