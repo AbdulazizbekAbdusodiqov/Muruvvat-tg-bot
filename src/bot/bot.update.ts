@@ -49,7 +49,7 @@ export class BotUpdate {
     
     if(donationId){
 
-      if(!findUser || !findUser.role || !findUser.lang || findUser.last_state!="finish"){
+      if(!findUser || !findUser.role || findUser.last_state!="finish"){
         this.botService.start(ctx);
       return;
       }else {
@@ -331,7 +331,7 @@ async onBackMain(@Ctx() ctx: Context) {
     await this.adminService.adminConfirmReq(ctx);
   }
 
-  @Action(/^Requestedit_/)
+  @Action(/^Requestedit_+\d+/)
   async onEditReq(@Ctx() ctx: Context) {
     await this.adminService.adminEditReq(ctx);
   }
@@ -500,7 +500,7 @@ async onBackMain(@Ctx() ctx: Context) {
           inline_keyboard: [
             [
               Markup.button.callback('✅', 'accept'),
-              Markup.button.callback('❌', `reject`),
+              Markup.button.callback('❌', `reject__district`),
             ],
           ],
         },
@@ -557,7 +557,7 @@ async onBackMain(@Ctx() ctx: Context) {
   }
 
 
-  @Action(/reject/)
+  @Action(/reject__district/)
   async reject(@Ctx() ctx: Context) {
     // const [, id] = (ctx.update as any).callback_query.data.split('=');
     const user_id = ctx.from?.id;
@@ -579,11 +579,10 @@ async onBackMain(@Ctx() ctx: Context) {
           reply_markup: buttons,
         });
       }
-    // await ctx.editMessageText(mainMessage[language], {
-    //   reply_markup: generousMenuKeys[language],
-    // });
 
   }
+
+  
 
   @Action("apply")
   async onAskReq(@Ctx() ctx: Context) {
