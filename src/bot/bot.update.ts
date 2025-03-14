@@ -47,6 +47,8 @@ export class BotUpdate {
     const donationId = payload?.split('_')[1];
     console.log(payload);
     console.log("test");
+    console.log(ctx);
+    console.log(ctx.text);
     
     
     if(donationId){
